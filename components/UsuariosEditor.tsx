@@ -20,9 +20,6 @@ export function UsuariosEditor({ usuarios, locales, miId }: { usuarios: Perfil[]
   return (
     <section className="tarjeta p-4 sm:p-5 overflow-x-auto">
       <h2 className="font-medium">Usuarios</h2>
-      <p className="text-xs text-muted mt-0.5">
-        Para dar de alta a alguien, créalo en Supabase → Authentication → Add user. Aparecerá aquí como encargado.
-      </p>
       <table className="w-full text-sm mt-3">
         <thead>
           <tr className="text-xs text-muted text-left border-b border-line">
