@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs'
 import { createClient } from '@/lib/supabase/server'
-import { cargarPanel } from '@/lib/resumen'
+import { cargarInforme } from '@/lib/informe'
+import { svgAPng } from '@/lib/rasterizar'
 import { esMesValido, nombreMes, rangoMes } from '@/lib/format'
 import { METODOS_PAGO, TIPOS_MOVIMIENTO } from '@/lib/types'
 
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
   const local = locales?.find((l) => l.id === url.searchParams.get('local')) ?? locales?.[0]
   if (!local) return new Response('Sin locales', { status: 400 })
 
-  const p = await cargarPanel(supabase, mes, local.id)
+  const p = await cargarInforme(supabase, mes, local.id)
   const { desde, hasta } = rangoMes(mes)
   const { data: gastos } = await supabase
     .from('gastos')
@@ -49,6 +50,27 @@ export async function GET(request: Request) {
   resumen.addRow([])
   resumen.addRow(['Flujo de caja', p.actual.flujo]).font = { bold: true, size: 12 }
   resumen.getColumn(2).numFmt = FORMATO_EUR
+
+  // Gráficos (los mismos del informe PDF, como imágenes)
+  const hojaGraficos = wb.addWorksheet('Gráficos', { views: [{ showGridLines: false }] })
+  hojaGraficos.getColumn(1).width = 110
+  let fila = 1
+  const graficos: [string, string | null][] = [
+    ['Ingresos por día', p.graficos.diario],
+    ['Ingresos por forma de cobro', p.graficos.reparto],
+    ['Gastos por partida', p.graficos.partidas],
+    ['Ingresos y gastos · últimos 6 meses', p.graficos.meses],
+  ]
+  for (const [titulo, svg] of graficos) {
+    if (!svg) continue
+    const ancho = Number(svg.match(/width="(d+)"/)?.[1] ?? 720)
+    const alto = Number(svg.match(/height="(d+)"/)?.[1] ?? 220)
+    hojaGraficos.getCell(fila, 1).value = titulo
+    hojaGraficos.getCell(fila, 1).font = { bold: true, size: 12 }
+    const imagen = wb.addImage({ buffer: svgAPng(svg, ancho) as unknown as ExcelJS.Buffer, extension: 'png' })
+    hojaGraficos.addImage(imagen, { tl: { col: 0, row: fila }, ext: { width: ancho, height: alto } })
+    fila += Math.ceil(alto / 20) + 3
+  }
 
   // Cierres
   const metodos = p.ingresosPorMetodo

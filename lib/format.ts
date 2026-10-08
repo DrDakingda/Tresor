@@ -1,4 +1,4 @@
-const eur = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const eur = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: 'always' })
 
 export function euros(n: number) {
   return eur.format(Math.round(n * 100) / 100)

@@ -102,3 +102,27 @@ body {
   .no-print { display: none !important; }
   .tarjeta { border-color: #ccc; break-inside: avoid; }
 }
+
+/* Páginas imprimibles (informe mensual y cierre) */
+.hoja {
+  background: #fff;
+  max-width: 210mm;
+  margin: 1.5rem auto;
+  padding: 14mm;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+}
+.hoja h2 { font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 1.75rem 0 0.5rem; }
+.hoja table { width: 100%; font-size: 0.8125rem; border-collapse: collapse; }
+.hoja th { font-weight: 500; color: var(--muted); font-size: 0.75rem; text-align: left; padding: 0.35rem 0.5rem 0.35rem 0; border-bottom: 1px solid var(--line-strong); }
+.hoja td { padding: 0.35rem 0.5rem 0.35rem 0; border-bottom: 1px solid var(--line); }
+.hoja th.num, .hoja td.num { text-align: right; padding-right: 0; padding-left: 0.5rem; }
+.hoja tfoot td { font-weight: 600; border-bottom: none; border-top: 1px solid var(--line-strong); }
+.grafico svg { width: 100%; height: auto; display: block; }
+.salto { break-before: page; }
+.bloque { break-inside: avoid; }
+
+@page { size: A4; margin: 12mm; }
+@media print {
+  .hoja { margin: 0; padding: 0; box-shadow: none; max-width: none; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

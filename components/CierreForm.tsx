@@ -245,7 +245,8 @@ export function CierreForm(props: Props) {
             <span className="etiqueta">Fecha</span>
             <input className="campo" type="date" required value={fecha} min={minFecha} max={hoyMadrid()} onChange={(e) => setFecha(e.target.value)} />
           </label>
-          <label className="space-y-1">
+          {/* Con una sola caja no hay nada que elegir: se asigna sola. */}
+          <label className={`space-y-1 ${cajas.length <= 1 ? 'hidden' : ''}`}>
             <span className="etiqueta">Caja</span>
             <select className="campo" required value={cajaId} onChange={(e) => setCajaId(e.target.value)}>
               {cajas.map((c) => (
@@ -253,7 +254,7 @@ export function CierreForm(props: Props) {
               ))}
             </select>
           </label>
-          <label className="space-y-1">
+          <label className={`space-y-1 ${cajas.length <= 1 ? 'sm:col-span-2' : ''}`}>
             <span className="etiqueta">Turno</span>
             <select className="campo" required value={turnoId} onChange={(e) => setTurnoId(e.target.value)}>
               {turnosVisibles.map((t) => (

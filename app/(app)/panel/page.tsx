@@ -4,7 +4,6 @@ import { requireAdmin } from '@/lib/auth'
 import { cargarPanel } from '@/lib/resumen'
 import { MesSelector } from '@/components/MesSelector'
 import { MovimientosEditor } from '@/components/MovimientosEditor'
-import { BotonImprimir } from '@/components/BotonImprimir'
 import { esMesValido, euros, mesActual, nombreMes } from '@/lib/format'
 import { TIPOS_MOVIMIENTO } from '@/lib/types'
 
@@ -44,7 +43,7 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
           )}
           <MesSelector mes={mes} ruta="/panel" />
           <a href={`/api/export?mes=${mes}${sufijo}`} className="btn">Excel</a>
-          <BotonImprimir />
+          <a href={`/informe?mes=${mes}${sufijo}&imprimir=1`} target="_blank" rel="noopener" className="btn">PDF</a>
         </div>
       </div>
 
