@@ -25,7 +25,7 @@ export default async function AjustesPage() {
         <ListaEditor tabla="eventos" titulo="Eventos" ayuda="Se crean solos al escribirlos en un cierre. Desactiva los que ya no quieras ver sugeridos." filas={c.eventos} />
         <ListaEditor tabla="turnos" titulo="Turnos" filas={c.turnos} conOrden />
         <ListaEditor tabla="locales" titulo="Locales" filas={c.locales} />
-        <ListaEditor tabla="cajas" titulo="Cajas" filas={c.cajas} extra={c.locales.length > 1 ? { tipo: 'select', campo: 'local_id', label: 'Local', opciones: opcionesLocal } : undefined} valoresNuevos={{ local_id: c.locales[0]?.id }} conOrden />
+        <ListaEditor tabla="cajas" titulo="Cajas" ayuda="Solo hace falta más de una si cobráis en varios puntos a la vez (por ejemplo, dos barras con su datáfono). Con una sola, no aparece en ningún otro sitio." filas={c.cajas} extra={c.locales.length > 1 ? { tipo: 'select', campo: 'local_id', label: 'Local', opciones: opcionesLocal } : undefined} valoresNuevos={{ local_id: c.locales[0]?.id }} conOrden />
       </div>
     </div>
   )

@@ -42,6 +42,7 @@ export default async function ImprimirCierrePage({ params }: PageProps<'/imprimi
     .maybeSingle()
   if (!data) notFound()
   const c = data as unknown as Datos
+  const { count: numCajas } = await supabase.from('cajas').select('id', { count: 'exact', head: true }).eq('activo', true)
 
   const ingresos = c.cierre_ingresos
     .map((i) => ({ ...i, importe: Number(i.importe) }))
@@ -61,7 +62,7 @@ export default async function ImprimirCierrePage({ params }: PageProps<'/imprimi
             <p className="text-xs text-muted uppercase tracking-wider">Cierre de caja</p>
             <h1 className="text-2xl font-semibold tracking-tight first-letter:uppercase">{fechaLarga(c.fecha)} {c.fecha.slice(0, 4)}</h1>
             <p className="text-sm text-muted">
-              {c.locales?.nombre} · {c.cajas?.nombre} · {c.turnos?.nombre}
+              {c.locales?.nombre}{(numCajas ?? 0) > 1 && ` · ${c.cajas?.nombre}`} · {c.turnos?.nombre}
               {c.eventos && ` · ${c.eventos.nombre}`}
             </p>
           </div>

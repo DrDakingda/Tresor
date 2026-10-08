@@ -31,6 +31,7 @@ export async function GET(request: Request) {
     .gte('cierres.fecha', desde)
     .lt('cierres.fecha', hasta)
 
+  const variasCajas = p.catalogos.cajas.filter((c) => c.activo).length > 1
   const wb = new ExcelJS.Workbook()
   wb.creator = 'Tresor'
 
@@ -77,7 +78,7 @@ export async function GET(request: Request) {
   const hojaCierres = wb.addWorksheet('Cierres')
   hojaCierres.columns = [
     { header: 'Fecha', key: 'fecha', width: 12 },
-    { header: 'Caja', key: 'caja', width: 14 },
+    ...(variasCajas ? [{ header: 'Caja', key: 'caja', width: 14 }] : []),
     { header: 'Turno', key: 'turno', width: 12 },
     { header: 'Evento', key: 'evento', width: 22 },
     ...metodos.map((m) => ({ header: m.nombre, key: m.id, width: 14 })),
@@ -98,7 +99,7 @@ export async function GET(request: Request) {
     })
   }
   hojaCierres.getColumn('fecha').numFmt = 'dd/mm/yyyy'
-  for (let i = 5; i <= hojaCierres.columnCount; i++) hojaCierres.getColumn(i).numFmt = FORMATO_EUR
+  for (let i = variasCajas ? 5 : 4; i <= hojaCierres.columnCount; i++) hojaCierres.getColumn(i).numFmt = FORMATO_EUR
   hojaCierres.getRow(1).font = { bold: true }
   hojaCierres.views = [{ state: 'frozen', ySplit: 1 }]
 
@@ -130,7 +131,7 @@ export async function GET(request: Request) {
   const hojaGastos = wb.addWorksheet('Gastos de caja')
   hojaGastos.columns = [
     { header: 'Fecha', key: 'fecha', width: 12 },
-    { header: 'Caja', key: 'caja', width: 14 },
+    ...(variasCajas ? [{ header: 'Caja', key: 'caja', width: 14 }] : []),
     { header: 'Turno', key: 'turno', width: 12 },
     { header: 'Método', key: 'metodo', width: 14 },
     { header: 'Categoría', key: 'categoria', width: 18 },

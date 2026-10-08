@@ -11,13 +11,15 @@ export default async function CierresPage({ searchParams }: PageProps<'/cierres'
   const perfil = await getPerfil()
   const supabase = await createClient()
   const { desde, hasta } = rangoMes(mes)
-  const [{ metodos, locales }, cierres] = await Promise.all([
+  const [{ metodos, locales, cajas }, cierres] = await Promise.all([
     cargarCatalogos(supabase),
     cierresDelMes(supabase, desde, hasta),
   ])
 
   const metodosVisibles = metodos.filter((m) => m.activo || cierres.some((c) => c.ingresos[m.id]))
   const variosLocales = locales.length > 1
+  // Con una sola caja no tiene sentido mostrarla.
+  const variasCajas = cajas.filter((c) => c.activo).length > 1
   const nombreLocal = (id: string) => locales.find((l) => l.id === id)?.nombre ?? ''
 
   const totales = {
@@ -47,7 +49,7 @@ export default async function CierresPage({ searchParams }: PageProps<'/cierres'
             <thead>
               <tr className="border-b border-line text-left">
                 <th className="etiqueta font-medium px-4 py-3">Fecha</th>
-                <th className="etiqueta font-medium px-4 py-3">Caja · turno</th>
+                <th className="etiqueta font-medium px-4 py-3">{variasCajas ? 'Caja · turno' : 'Turno'}</th>
                 {metodosVisibles.map((m) => (
                   <th key={m.id} className="etiqueta font-medium px-4 py-3 text-right">{m.nombre}</th>
                 ))}
@@ -64,7 +66,7 @@ export default async function CierresPage({ searchParams }: PageProps<'/cierres'
                     {c.evento && <span className="block text-xs text-accent">{c.evento}</span>}
                   </td>
                   <td className="px-4 py-2.5 text-muted whitespace-nowrap">
-                    {variosLocales && `${nombreLocal(c.local_id)} · `}{c.caja} · {c.turno}
+                    {variosLocales && `${nombreLocal(c.local_id)} · `}{variasCajas && `${c.caja} · `}{c.turno}
                   </td>
                   {metodosVisibles.map((m) => (
                     <td key={m.id} className="num px-4 py-2.5">{c.ingresos[m.id] ? euros(c.ingresos[m.id]) : '—'}</td>

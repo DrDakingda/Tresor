@@ -34,7 +34,12 @@ export default async function HistorialPage({ searchParams }: PageProps<'/histor
     q = q.limit(100)
   }
 
-  const [{ data }, { data: locales }] = await Promise.all([q, supabase.from('locales').select('id, nombre')])
+  const [{ data }, { data: locales }, { count: numCajas }] = await Promise.all([
+    q,
+    supabase.from('locales').select('id, nombre'),
+    supabase.from('cajas').select('id', { count: 'exact', head: true }).eq('activo', true),
+  ])
+  const variasCajas = (numCajas ?? 0) > 1
   const entradas = (data ?? []) as Entrada[]
 
   // Versiones anteriores de los cierres mostrados, para poder comparar.
@@ -65,7 +70,7 @@ export default async function HistorialPage({ searchParams }: PageProps<'/histor
           <h1 className="text-xl font-semibold tracking-tight mt-1">
             {cierreId && titulo ? <span className="first-letter:uppercase inline-block">Historial · {fechaLarga(titulo.fecha)}</span> : 'Historial de cambios'}
           </h1>
-          {cierreId && titulo && <p className="text-sm text-muted">{titulo.caja} · {titulo.turno}{titulo.evento ? ` · ${titulo.evento}` : ''}</p>}
+          {cierreId && titulo && <p className="text-sm text-muted">{variasCajas && `${titulo.caja} · `}{titulo.turno}{titulo.evento ? ` · ${titulo.evento}` : ''}</p>}
         </div>
         {!cierreId && (
           <div className="flex gap-1 text-sm">
@@ -102,7 +107,7 @@ export default async function HistorialPage({ searchParams }: PageProps<'/histor
                       ) : (
                         <Link href={`/historial?cierre=${e.cierre_id}`} className="underline hover:text-ink">{fechaLarga(e.datos.fecha)}</Link>
                       )}
-                      {' '}· {variosLocales && `${nombreLocal(e.local_id)} · `}{e.datos.caja} · {e.datos.turno}
+                      {' '}· {variosLocales && `${nombreLocal(e.local_id)} · `}{variasCajas && `${e.datos.caja} · `}{e.datos.turno}
                     </span>
                   )}
                 </div>
