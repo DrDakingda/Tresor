@@ -10,13 +10,15 @@ type Extra =
 
 type Fila = { id: string; nombre: string; activo: boolean; orden?: number }
 
-export function ListaEditor({ tabla, titulo, ayuda, filas, extra, conOrden }: {
+export function ListaEditor({ tabla, titulo, ayuda, filas, extra, conOrden, valoresNuevos }: {
   tabla: string
   titulo: string
   ayuda?: string
   filas: Fila[]
   extra?: Extra
   conOrden?: boolean
+  // Campos fijos que se añaden a cada fila nueva (p. ej. el local de una caja).
+  valoresNuevos?: Record<string, unknown>
 }) {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
@@ -36,7 +38,7 @@ export function ListaEditor({ tabla, titulo, ayuda, filas, extra, conOrden }: {
     const nombre = nuevo.trim()
     if (!nombre) return
     setError(null)
-    const fila: Record<string, unknown> = { nombre }
+    const fila: Record<string, unknown> = { ...valoresNuevos, nombre }
     if (extra?.tipo === 'select') fila[extra.campo] = nuevoExtra
     if (conOrden) fila.orden = Math.max(-1, ...filas.map((f) => f.orden ?? 0)) + 1
     const { error } = await supabase.from(tabla).insert(fila)
