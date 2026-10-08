@@ -93,8 +93,8 @@ export function MovimientosEditor({ mes, localId, movimientos }: { mes: string; 
 
       {movimientos.length === 0 && <p className="text-sm text-muted">Sin apuntes este mes.</p>}
 
-      <form onSubmit={anadir} className="no-print grid gap-2 sm:grid-cols-12 items-end pt-2 border-t border-line">
-        <label className="space-y-1 sm:col-span-3">
+      <form onSubmit={anadir} className="no-print grid gap-2 grid-cols-2 items-end pt-3 border-t border-line">
+        <label className="space-y-1">
           <span className="etiqueta">Tipo</span>
           <select className="campo" value={tipo} onChange={(e) => setTipo(e.target.value as TipoMovimiento)}>
             {TIPOS_MOVIMIENTO.map((t) => (
@@ -102,15 +102,17 @@ export function MovimientosEditor({ mes, localId, movimientos }: { mes: string; 
             ))}
           </select>
         </label>
-        <label className="space-y-1 sm:col-span-5">
-          <span className="etiqueta">Concepto</span>
-          <input className="campo" placeholder="Alquiler, nóminas, pedido Mahou…" value={concepto} onChange={(e) => setConcepto(e.target.value)} />
-        </label>
-        <label className="space-y-1 sm:col-span-2">
+        <label className="space-y-1">
           <span className="etiqueta">Importe</span>
           <input className="campo num" inputMode="decimal" placeholder="0,00" value={importe} onChange={(e) => setImporte(e.target.value)} />
         </label>
-        <button className="btn btn-primario sm:col-span-2" disabled={ocupado}>Añadir</button>
+        <label className="space-y-1 col-span-2">
+          <span className="etiqueta">Concepto</span>
+          <input className="campo" placeholder="Alquiler, nóminas, pedido Mahou…" value={concepto} onChange={(e) => setConcepto(e.target.value)} />
+        </label>
+        <div className="col-span-2 flex justify-end">
+          <button className="btn btn-primario" disabled={ocupado}>Añadir</button>
+        </div>
       </form>
 
       {sinFijos && (
