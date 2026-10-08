@@ -27,9 +27,8 @@ type Datos = {
   }[]
 }
 
-export default async function ImprimirCierrePage({ params, searchParams }: PageProps<'/imprimir/cierre/[id]'>) {
+export default async function ImprimirCierrePage({ params }: PageProps<'/imprimir/cierre/[id]'>) {
   const { id } = await params
-  const { imprimir } = await searchParams
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound()
   await getPerfil()
   const supabase = await createClient()
@@ -55,7 +54,7 @@ export default async function ImprimirCierrePage({ params, searchParams }: PageP
 
   return (
     <>
-      <BarraImpresion volver={`/cierres/${c.id}`} autoImprimir={imprimir === '1'} />
+      <BarraImpresion volver={`/cierres/${c.id}`} />
       <article className="hoja">
         <header className="flex items-start justify-between border-b-2 border-ink pb-3">
           <div>

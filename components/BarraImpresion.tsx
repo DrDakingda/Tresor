@@ -1,16 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
 import Link from 'next/link'
 
-// Barra superior de las páginas imprimibles; con ?imprimir=1 abre el diálogo al cargar.
-export function BarraImpresion({ volver, autoImprimir }: { volver: string; autoImprimir: boolean }) {
-  useEffect(() => {
-    if (!autoImprimir) return
-    const t = setTimeout(() => window.print(), 400)
-    return () => clearTimeout(t)
-  }, [autoImprimir])
-
+// Barra superior de las páginas imprimibles (informe mensual y cierre).
+export function BarraImpresion({ volver }: { volver: string }) {
   return (
     <div className="no-print sticky top-0 z-10 bg-surface border-b border-line">
       <div className="mx-auto max-w-[210mm] px-4 h-14 flex items-center justify-between">

@@ -21,7 +21,7 @@ export default async function InformePage({ searchParams }: PageProps<'/informe'
 
   return (
     <>
-      <BarraImpresion volver={`/panel?mes=${mes}${locales && locales.length > 1 ? `&local=${local.id}` : ''}`} autoImprimir={params.imprimir === '1'} />
+      <BarraImpresion volver={`/panel?mes=${mes}${locales && locales.length > 1 ? `&local=${local.id}` : ''}`} />
       <article className="hoja">
         <header className="flex items-start justify-between border-b-2 border-ink pb-3">
           <div>

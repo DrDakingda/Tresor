@@ -43,7 +43,7 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
           )}
           <MesSelector mes={mes} ruta="/panel" />
           <a href={`/api/export?mes=${mes}${sufijo}`} className="btn">Excel</a>
-          <a href={`/informe?mes=${mes}${sufijo}&imprimir=1`} target="_blank" rel="noopener" className="btn">PDF</a>
+          <a href={`/informe?mes=${mes}${sufijo}`} target="_blank" rel="noopener" className="btn">PDF</a>
         </div>
       </div>
 

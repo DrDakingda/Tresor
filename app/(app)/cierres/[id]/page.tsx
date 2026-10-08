@@ -39,7 +39,7 @@ export default async function CierrePage({ params }: PageProps<'/cierres/[id]'>)
           <h1 className="text-xl font-semibold tracking-tight mt-1 first-letter:uppercase">Cierre del {fechaLarga(cierre.fecha)}</h1>
         </div>
         <div className="flex gap-2 no-print">
-          <a href={`/imprimir/cierre/${cierre.id}?imprimir=1`} target="_blank" rel="noopener" className="btn">Imprimir</a>
+          <a href={`/imprimir/cierre/${cierre.id}`} target="_blank" rel="noopener" className="btn">Imprimir</a>
           {perfil.rol === 'admin' && (
             <Link href={`/historial?cierre=${cierre.id}`} className="btn">Historial de cambios</Link>
           )}
