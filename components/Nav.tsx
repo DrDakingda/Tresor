@@ -10,7 +10,7 @@ export function Nav({ nombre, esAdmin }: { nombre: string; esAdmin: boolean }) {
 
   const enlaces = esAdmin
     ? [
-        { href: '/panel', label: 'Responsables' },
+        { href: '/panel', label: 'Resumen' },
         { href: '/cierres', label: 'Cierres' },
         { href: '/historial', label: 'Historial' },
         { href: '/ajustes', label: 'Ajustes' },

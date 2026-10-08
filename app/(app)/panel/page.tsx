@@ -26,7 +26,7 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Responsables</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Resumen</h1>
           <p className="text-sm text-muted capitalize print:block">
             {nombreMes(mes)}
             {locales && locales.length > 1 && ` · ${locales.find((l) => l.id === localId)?.nombre}`}
