@@ -25,7 +25,7 @@ export function LoginForm({ sinAcceso }: { sinAcceso: boolean }) {
       setEnviando(false)
       return
     }
-    router.replace('/cierres')
+    router.replace('/')
     router.refresh()
   }
 

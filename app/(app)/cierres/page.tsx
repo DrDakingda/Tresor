@@ -61,6 +61,7 @@ export default async function CierresPage({ searchParams }: PageProps<'/cierres'
                 <tr key={c.id} className="border-b border-line last:border-0 hover:bg-bg">
                   <td className="px-4 py-2.5 whitespace-nowrap">
                     <Link href={`/cierres/${c.id}`} className="capitalize hover:underline">{fechaLarga(c.fecha)}</Link>
+                    {c.evento && <span className="block text-xs text-accent">{c.evento}</span>}
                   </td>
                   <td className="px-4 py-2.5 text-muted whitespace-nowrap">
                     {variosLocales && `${nombreLocal(c.local_id)} · `}{c.caja} · {c.turno}

@@ -17,14 +17,15 @@ export default async function CierrePage({ params }: PageProps<'/cierres/[id]'>)
     cargarCatalogos(supabase),
     supabase
       .from('cierres')
-      .select('id, local_id, caja_id, turno_id, fecha, notas, ingresos:cierre_ingresos(metodo_id, importe), gastos(id, metodo, categoria_id, concepto, autorizado_id, importe, ticket_path, created_at)')
+      .select('id, local_id, caja_id, turno_id, fecha, notas, eventos(nombre), ingresos:cierre_ingresos(metodo_id, importe), gastos(id, metodo, categoria_id, concepto, autorizado_id, importe, ticket_path, created_at)')
       .eq('id', id)
       .order('created_at', { referencedTable: 'gastos' })
       .maybeSingle(),
   ])
   if (!data) notFound()
 
-  const cierre = data as unknown as Cierre
+  const cierre = data as unknown as Cierre & { eventos: { nombre: string } | null }
+  cierre.evento = cierre.eventos?.nombre ?? null
   cierre.ingresos = cierre.ingresos.map((i) => ({ ...i, importe: Number(i.importe) }))
   cierre.gastos = cierre.gastos.map((g) => ({ ...g, importe: Number(g.importe) }))
 
@@ -37,6 +38,9 @@ export default async function CierrePage({ params }: PageProps<'/cierres/[id]'>)
           <Link href={`/cierres?mes=${cierre.fecha.slice(0, 7)}`} className="text-sm text-muted hover:text-ink no-print">← Cierres</Link>
           <h1 className="text-xl font-semibold tracking-tight mt-1 first-letter:uppercase">Cierre del {fechaLarga(cierre.fecha)}</h1>
         </div>
+        {perfil.rol === 'admin' && (
+          <Link href={`/historial?cierre=${cierre.id}`} className="btn no-print">Historial de cambios</Link>
+        )}
       </div>
       <CierreForm perfil={perfil} {...catalogos} cierre={cierre} editable={editable} />
     </div>

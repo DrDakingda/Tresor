@@ -8,15 +8,14 @@ export function Nav({ nombre, esAdmin }: { nombre: string; esAdmin: boolean }) {
   const pathname = usePathname()
   const router = useRouter()
 
-  const enlaces = [
-    { href: '/cierres', label: 'Cierres' },
-    ...(esAdmin
-      ? [
-          { href: '/panel', label: 'Responsables' },
-          { href: '/ajustes', label: 'Ajustes' },
-        ]
-      : []),
-  ]
+  const enlaces = esAdmin
+    ? [
+        { href: '/panel', label: 'Responsables' },
+        { href: '/cierres', label: 'Cierres' },
+        { href: '/historial', label: 'Historial' },
+        { href: '/ajustes', label: 'Ajustes' },
+      ]
+    : [{ href: '/cierres', label: 'Cierres' }]
 
   async function salir() {
     await createClient().auth.signOut()
@@ -26,9 +25,9 @@ export function Nav({ nombre, esAdmin }: { nombre: string; esAdmin: boolean }) {
 
   return (
     <header className="no-print border-b border-line bg-surface">
-      <div className="mx-auto max-w-5xl px-4 h-14 flex items-center gap-6">
-        <Link href="/cierres" className="font-semibold tracking-tight">Tresor</Link>
-        <nav className="flex gap-1 text-sm">
+      <div className="mx-auto max-w-5xl px-4 h-14 flex items-center gap-3 sm:gap-6">
+        <Link href="/" className="font-semibold tracking-tight">Tresor</Link>
+        <nav className="flex gap-1 text-sm overflow-x-auto">
           {enlaces.map((e) => (
             <Link
               key={e.href}

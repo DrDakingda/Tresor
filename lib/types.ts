@@ -9,6 +9,7 @@ export type Turno = { id: string; nombre: string; orden: number; activo: boolean
 export type MetodoIngreso = { id: string; nombre: string; es_efectivo: boolean; orden: number; activo: boolean }
 export type Categoria = { id: string; nombre: string; activo: boolean }
 export type Autorizador = { id: string; nombre: string; activo: boolean }
+export type Evento = { id: string; nombre: string; activo: boolean }
 
 export type Gasto = {
   id?: string
@@ -26,6 +27,7 @@ export type Cierre = {
   caja_id: string
   turno_id: string
   fecha: string
+  evento: string | null
   notas: string | null
   ingresos: { metodo_id: string; importe: number }[]
   gastos: Gasto[]

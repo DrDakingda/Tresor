@@ -1,15 +1,16 @@
 import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Autorizador, Caja, Categoria, Local, MetodoIngreso, Turno } from '@/lib/types'
+import type { Autorizador, Caja, Categoria, Evento, Local, MetodoIngreso, Turno } from '@/lib/types'
 
 export async function cargarCatalogos(supabase: SupabaseClient) {
-  const [locales, cajas, turnos, metodos, categorias, autorizadores] = await Promise.all([
+  const [locales, cajas, turnos, metodos, categorias, autorizadores, eventos] = await Promise.all([
     supabase.from('locales').select('*').order('created_at'),
     supabase.from('cajas').select('*').order('orden').order('nombre'),
     supabase.from('turnos').select('*').order('orden'),
     supabase.from('metodos_ingreso').select('*').order('orden'),
     supabase.from('categorias_gasto').select('*').order('nombre'),
     supabase.from('autorizadores').select('*').order('nombre'),
+    supabase.from('eventos').select('id, nombre, activo').order('created_at', { ascending: false }),
   ])
   return {
     locales: (locales.data ?? []) as Local[],
@@ -18,6 +19,7 @@ export async function cargarCatalogos(supabase: SupabaseClient) {
     metodos: (metodos.data ?? []) as MetodoIngreso[],
     categorias: (categorias.data ?? []) as Categoria[],
     autorizadores: (autorizadores.data ?? []) as Autorizador[],
+    eventos: (eventos.data ?? []) as Evento[],
   }
 }
 
@@ -27,6 +29,7 @@ export type CierreResumen = {
   fecha: string
   caja: string
   turno: string
+  evento: string | null
   ingresos: Record<string, number>
   totalIngresos: number
   gastos: { metodo: string; categoria_id: string; importe: number }[]
@@ -37,7 +40,7 @@ export type CierreResumen = {
 export async function cierresDelMes(supabase: SupabaseClient, desde: string, hasta: string, localId?: string) {
   let q = supabase
     .from('cierres')
-    .select('id, local_id, fecha, cajas(nombre), turnos(nombre, orden), cierre_ingresos(metodo_id, importe), gastos(metodo, categoria_id, importe)')
+    .select('id, local_id, fecha, cajas(nombre), turnos(nombre, orden), eventos(nombre), cierre_ingresos(metodo_id, importe), gastos(metodo, categoria_id, importe)')
     .gte('fecha', desde)
     .lt('fecha', hasta)
     .order('fecha', { ascending: false })
@@ -51,6 +54,7 @@ export async function cierresDelMes(supabase: SupabaseClient, desde: string, has
     fecha: string
     cajas: { nombre: string } | null
     turnos: { nombre: string; orden: number } | null
+    eventos: { nombre: string } | null
     cierre_ingresos: { metodo_id: string; importe: number }[]
     gastos: { metodo: string; categoria_id: string; importe: number }[]
   }
@@ -67,6 +71,7 @@ export async function cierresDelMes(supabase: SupabaseClient, desde: string, has
         fecha: c.fecha,
         caja: c.cajas?.nombre ?? '',
         turno: c.turnos?.nombre ?? '',
+        evento: c.eventos?.nombre ?? null,
         ingresos,
         totalIngresos: Object.values(ingresos).reduce((s, n) => s + n, 0),
         gastos,

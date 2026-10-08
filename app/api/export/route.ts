@@ -57,6 +57,7 @@ export async function GET(request: Request) {
     { header: 'Fecha', key: 'fecha', width: 12 },
     { header: 'Caja', key: 'caja', width: 14 },
     { header: 'Turno', key: 'turno', width: 12 },
+    { header: 'Evento', key: 'evento', width: 22 },
     ...metodos.map((m) => ({ header: m.nombre, key: m.id, width: 14 })),
     { header: 'Total ingresos', key: 'ingresos', width: 15 },
     { header: 'Gastos', key: 'gastos', width: 14 },
@@ -67,6 +68,7 @@ export async function GET(request: Request) {
       fecha: new Date(c.fecha + 'T12:00:00Z'),
       caja: c.caja,
       turno: c.turno,
+      evento: c.evento ?? '',
       ...Object.fromEntries(metodos.map((m) => [m.id, c.ingresos[m.id] ?? 0])),
       ingresos: c.totalIngresos,
       gastos: c.totalGastos,
@@ -74,9 +76,24 @@ export async function GET(request: Request) {
     })
   }
   hojaCierres.getColumn('fecha').numFmt = 'dd/mm/yyyy'
-  for (let i = 4; i <= hojaCierres.columnCount; i++) hojaCierres.getColumn(i).numFmt = FORMATO_EUR
+  for (let i = 5; i <= hojaCierres.columnCount; i++) hojaCierres.getColumn(i).numFmt = FORMATO_EUR
   hojaCierres.getRow(1).font = { bold: true }
   hojaCierres.views = [{ state: 'frozen', ySplit: 1 }]
+
+  // Por evento
+  if (p.eventosMes.length) {
+    const hojaEventos = wb.addWorksheet('Eventos')
+    hojaEventos.columns = [
+      { header: 'Evento', key: 'nombre', width: 28 },
+      { header: 'Cierres', key: 'cierres', width: 10 },
+      { header: 'Ingresos', key: 'ingresos', width: 14 },
+      { header: 'Gastos', key: 'gastos', width: 14 },
+      { header: 'Neto', key: 'neto', width: 14 },
+    ]
+    for (const e of p.eventosMes) hojaEventos.addRow(e)
+    for (const k of ['ingresos', 'gastos', 'neto']) hojaEventos.getColumn(k).numFmt = FORMATO_EUR
+    hojaEventos.getRow(1).font = { bold: true }
+  }
 
   // Gastos de caja (detalle)
   type FilaGasto = {

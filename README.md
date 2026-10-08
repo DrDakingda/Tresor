@@ -1,4 +1,4 @@
-# Tresor
+# tresor
 
 Cierres de caja y control financiero interno. Next.js 16 + Supabase, desplegado en Vercel.
 

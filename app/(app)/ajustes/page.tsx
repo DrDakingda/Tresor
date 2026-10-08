@@ -22,6 +22,7 @@ export default async function AjustesPage() {
         <ListaEditor tabla="autorizadores" titulo="Autorizan gastos" ayuda="Personas que aparecen en «Autorizado por»." filas={c.autorizadores} />
         <ListaEditor tabla="categorias_gasto" titulo="Categorías de gasto" filas={c.categorias} />
         <ListaEditor tabla="metodos_ingreso" titulo="Formas de cobro" ayuda="Marca la que cuenta como efectivo en caja." filas={c.metodos} extra={{ tipo: 'checkbox', campo: 'es_efectivo', label: 'Efectivo' }} conOrden />
+        <ListaEditor tabla="eventos" titulo="Eventos" ayuda="Se crean solos al escribirlos en un cierre. Desactiva los que ya no quieras ver sugeridos." filas={c.eventos} />
         <ListaEditor tabla="turnos" titulo="Turnos" filas={c.turnos} conOrden />
         <ListaEditor tabla="locales" titulo="Locales" filas={c.locales} />
         <ListaEditor tabla="cajas" titulo="Cajas" filas={c.cajas} extra={{ tipo: 'select', campo: 'local_id', label: 'Local', opciones: opcionesLocal }} conOrden />

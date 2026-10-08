@@ -6,10 +6,11 @@ import { createClient } from '@/lib/supabase/client'
 import { euros, fechaCierrePorDefecto, hoyMadrid, importeAInput, parseImporte, sumarDias } from '@/lib/format'
 import { comprimirImagen } from '@/lib/imagen'
 import { METODOS_PAGO } from '@/lib/types'
-import type { Autorizador, Caja, Categoria, Cierre, Local, MetodoIngreso, MetodoPago, Perfil, Turno } from '@/lib/types'
+import type { Autorizador, Caja, Categoria, Cierre, Evento, Local, MetodoIngreso, MetodoPago, Perfil, Turno } from '@/lib/types'
 
 type FilaGasto = {
   key: string
+  id?: string
   metodo: MetodoPago
   categoria_id: string
   concepto: string
@@ -27,6 +28,7 @@ type Props = {
   metodos: MetodoIngreso[]
   categorias: Categoria[]
   autorizadores: Autorizador[]
+  eventos: Evento[]
   cierre?: Cierre
   editable: boolean
 }
@@ -34,7 +36,7 @@ type Props = {
 const NUEVA_CATEGORIA = '__nueva__'
 
 export function CierreForm(props: Props) {
-  const { perfil, locales, turnos, metodos, autorizadores, cierre, editable } = props
+  const { perfil, locales, turnos, metodos, autorizadores, eventos, cierre, editable } = props
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
   const esAdmin = perfil.rol === 'admin'
@@ -46,6 +48,7 @@ export function CierreForm(props: Props) {
   const turnosVisibles = turnos.filter((t) => t.activo || t.id === cierre?.turno_id)
   const [turnoId, setTurnoId] = useState(cierre?.turno_id ?? turnosVisibles[0]?.id ?? '')
   const [fecha, setFecha] = useState(cierre?.fecha ?? fechaCierrePorDefecto())
+  const [evento, setEvento] = useState(cierre?.evento ?? '')
   const [notas, setNotas] = useState(cierre?.notas ?? '')
 
   const metodosVisibles = metodos.filter((m) => m.activo || cierre?.ingresos.some((i) => i.metodo_id === m.id))
@@ -56,6 +59,7 @@ export function CierreForm(props: Props) {
   const [gastos, setGastos] = useState<FilaGasto[]>(() =>
     (cierre?.gastos ?? []).map((g) => ({
       key: crypto.randomUUID(),
+      id: g.id,
       metodo: g.metodo,
       categoria_id: g.categoria_id,
       concepto: g.concepto,
@@ -169,9 +173,11 @@ export function CierreForm(props: Props) {
         caja_id: cajaId,
         turno_id: turnoId,
         fecha,
+        evento: evento.trim(),
         notas,
         ingresos: metodosVisibles.map((m) => ({ metodo_id: m.id, importe: parseImporte(ingresos[m.id] ?? '') || 0 })),
         gastos: gastos.map((g) => ({
+          id: g.id ?? null,
           metodo: g.metodo,
           categoria_id: g.categoria_id,
           concepto: g.concepto.trim(),
@@ -195,7 +201,7 @@ export function CierreForm(props: Props) {
   async function borrar() {
     if (!cierre || !window.confirm('¿Borrar este cierre y todos sus gastos?')) return
     setGuardando(true)
-    const { error } = await supabase.from('cierres').delete().eq('id', cierre.id)
+    const { error } = await supabase.rpc('borrar_cierre', { p_id: cierre.id })
     if (error) {
       setGuardando(false)
       setError('No se ha podido borrar el cierre.')
@@ -255,6 +261,27 @@ export function CierreForm(props: Props) {
               ))}
             </select>
           </label>
+          <label className="space-y-1 sm:col-span-4">
+            <span className="etiqueta">Evento <span className="normal-case tracking-normal font-normal text-faint">(opcional)</span></span>
+            <input
+              className="campo"
+              list="eventos-sugeridos"
+              autoComplete="off"
+              placeholder="Escribe o elige un evento"
+              value={evento}
+              onChange={(e) => setEvento(e.target.value)}
+            />
+            <datalist id="eventos-sugeridos">
+              {eventos
+                .filter((ev) => ev.activo)
+                .map((ev) => (
+                  <option key={ev.id} value={ev.nombre} />
+                ))}
+            </datalist>
+            {evento.trim() && !eventos.some((ev) => ev.nombre.toLowerCase() === evento.trim().toLowerCase()) && (
+              <span className="block text-xs text-faint">Evento nuevo: se añadirá a la lista al guardar.</span>
+            )}
+          </label>
         </section>
 
         {/* Ingresos */}
@@ -300,7 +327,7 @@ export function CierreForm(props: Props) {
                       ))}
                     </select>
                   </label>
-                  <label className="space-y-1 sm:col-span-2">
+                  <label className="space-y-1 sm:col-span-3">
                     <span className="etiqueta">Categoría</span>
                     <select className="campo" value={g.categoria_id} onChange={(e) => elegirCategoria(g.key, e.target.value)}>
                       <option value="" disabled>Elegir…</option>
@@ -331,7 +358,7 @@ export function CierreForm(props: Props) {
                     <span className="etiqueta">Importe</span>
                     <input className="campo num" inputMode="decimal" placeholder="0,00" value={g.importe} onChange={(e) => actualizarGasto(g.key, { importe: e.target.value })} />
                   </label>
-                  <div className="sm:col-span-1 flex gap-1 justify-end">
+                  <div className="sm:col-span-12 flex items-center justify-between gap-2">
                     <TicketBoton
                       ruta={g.ticket_path}
                       subiendo={!!g.subiendo}
@@ -340,11 +367,11 @@ export function CierreForm(props: Props) {
                     />
                     <button
                       type="button"
-                      className="btn h-10 w-10 px-0 text-muted no-print"
+                      className="text-xs text-muted hover:text-neg no-print"
                       aria-label={`Quitar gasto ${i + 1}`}
                       onClick={() => setGastos((gs) => gs.filter((x) => x.key !== g.key))}
                     >
-                      ×
+                      Quitar gasto
                     </button>
                   </div>
                 </div>
@@ -413,8 +440,8 @@ function TicketBoton({ ruta, subiendo, onSubir, onVer }: { ruta: string | null; 
   if (ruta) {
     return (
       // Enlace en vez de botón para que siga funcionando en cierres bloqueados (fieldset deshabilitado)
-      <a href="#" onClick={(e) => { e.preventDefault(); onVer() }} className="btn h-10 px-2 text-xs text-accent" title="Ver ticket">
-        Ticket
+      <a href="#" onClick={(e) => { e.preventDefault(); onVer() }} className="btn h-8 px-3 text-xs text-accent" title="Ver ticket">
+        Ver ticket
       </a>
     )
   }
@@ -431,8 +458,8 @@ function TicketBoton({ ruta, subiendo, onSubir, onVer }: { ruta: string | null; 
           e.target.value = ''
         }}
       />
-      <button type="button" onClick={() => input.current?.click()} className="btn h-10 px-2 text-xs no-print" title="Adjuntar ticket" disabled={subiendo}>
-        {subiendo ? '…' : '+ Ticket'}
+      <button type="button" onClick={() => input.current?.click()} className="btn h-8 px-3 text-xs no-print" title="Adjuntar ticket" disabled={subiendo}>
+        {subiendo ? 'Subiendo…' : 'Adjuntar ticket'}
       </button>
     </>
   )

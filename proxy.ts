@@ -30,7 +30,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
   if (user && pathname === '/login' && !request.nextUrl.searchParams.has('sin-acceso')) {
-    return NextResponse.redirect(new URL('/cierres', request.url))
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return response

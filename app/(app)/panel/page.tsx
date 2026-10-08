@@ -154,6 +154,35 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
         </div>
       </section>
 
+      {/* Por evento */}
+      {p.eventosMes.length > 0 && (
+        <section className="tarjeta p-4 sm:p-5 overflow-x-auto">
+          <h2 className="etiqueta mb-2">Por evento</h2>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-line text-xs text-muted">
+                <th className="text-left font-normal py-1.5">Evento</th>
+                <th className="text-right font-normal py-1.5">Cierres</th>
+                <th className="text-right font-normal py-1.5">Ingresos</th>
+                <th className="text-right font-normal py-1.5">Gastos</th>
+                <th className="text-right font-normal py-1.5">Neto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {p.eventosMes.map((e) => (
+                <tr key={e.nombre} className="border-b border-line last:border-0">
+                  <td className="py-2">{e.nombre}</td>
+                  <td className="num py-2 text-muted">{e.cierres}</td>
+                  <td className="num py-2">{euros(e.ingresos)}</td>
+                  <td className="num py-2 text-muted">{euros(e.gastos)}</td>
+                  <td className="num py-2 font-medium">{euros(e.neto)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
+
       {/* Comparativa */}
       <section className="tarjeta p-4 sm:p-5 overflow-x-auto">
         <h2 className="etiqueta mb-2">Últimos 6 meses</h2>

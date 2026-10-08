@@ -63,6 +63,19 @@ export async function cargarPanel(supabase: SupabaseClient, mes: string, localId
     importe: movimientosMes.filter((m) => m.tipo === tipo).reduce((s, m) => s + m.importe, 0),
   }))
 
+  const porEvento = new Map<string, { cierres: number; ingresos: number; gastos: number }>()
+  for (const c of cierresMes) {
+    if (!c.evento) continue
+    const fila = porEvento.get(c.evento) ?? { cierres: 0, ingresos: 0, gastos: 0 }
+    fila.cierres += 1
+    fila.ingresos += c.totalIngresos
+    fila.gastos += c.totalGastos
+    porEvento.set(c.evento, fila)
+  }
+  const eventosMes = [...porEvento.entries()]
+    .map(([nombre, v]) => ({ nombre, ...v, neto: v.ingresos - v.gastos }))
+    .sort((a, b) => b.ingresos - a.ingresos)
+
   const historico = Array.from({ length: 6 }, (_, i) => resumir(desplazarMes(primerMes, i), cierres, movimientos)).reverse()
 
   return {
@@ -72,6 +85,7 @@ export async function cargarPanel(supabase: SupabaseClient, mes: string, localId
     ingresosPorMetodo,
     gastosPorCategoria,
     movimientosPorTipo,
+    eventosMes,
     actual: historico[0],
     anterior: historico[1],
     historico,
