@@ -23,20 +23,20 @@ export default async function InformePage({ searchParams }: PageProps<'/informe'
     <>
       <BarraImpresion volver={`/panel?mes=${mes}${locales && locales.length > 1 ? `&local=${local.id}` : ''}`} />
       <article className="hoja">
-        <header className="flex items-start justify-between border-b-2 border-ink pb-3">
+        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 border-b-2 border-ink pb-3">
           <div>
             <p className="text-xs text-muted uppercase tracking-wider">Informe mensual</p>
             <h1 className="text-2xl font-semibold tracking-tight capitalize">{nombreMes(mes)}</h1>
             <p className="text-sm text-muted">{local.nombre}</p>
           </div>
-          <div className="text-right text-xs text-muted">
+          <div className="sm:text-right text-xs text-muted">
             <p className="font-semibold text-ink text-sm">Tresor</p>
             <p>Generado el {fechaHora(new Date().toISOString())}</p>
             <p>{p.cierresMes.length} cierres</p>
           </div>
         </header>
 
-        <section className="grid grid-cols-4 gap-3 mt-5 bloque">
+        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 bloque">
           <Cifra etiqueta="Ingresos" valor={euros(p.actual.ingresos)} />
           <Cifra etiqueta="Gastos totales" valor={euros(gastosTotales)} />
           <Cifra etiqueta="Flujo de caja" valor={euros(p.actual.flujo)} destacado negativo={p.actual.flujo < 0} />
@@ -49,12 +49,12 @@ export default async function InformePage({ searchParams }: PageProps<'/informe'
 
         <div className="bloque">
           <h2>Ingresos por día</h2>
-          <div className="grafico" dangerouslySetInnerHTML={{ __html: p.graficos.diario }} />
+          <Grafico svg={p.graficos.ancho.diario} movil={p.graficos.movil.diario} />
         </div>
 
         <div className="bloque">
           <h2>Ingresos por forma de cobro</h2>
-          <div className="grafico" dangerouslySetInnerHTML={{ __html: p.graficos.reparto }} />
+          <Grafico svg={p.graficos.ancho.reparto} movil={p.graficos.movil.reparto} />
           <table className="mt-2">
             <tbody>
               {metodos.map((m) => (
@@ -77,8 +77,8 @@ export default async function InformePage({ searchParams }: PageProps<'/informe'
 
         <div className="bloque">
           <h2>Gastos por partida</h2>
-          {p.graficos.partidas ? (
-            <div className="grafico" dangerouslySetInnerHTML={{ __html: p.graficos.partidas }} />
+          {p.graficos.ancho.partidas ? (
+            <Grafico svg={p.graficos.ancho.partidas} movil={p.graficos.movil.partidas!} />
           ) : (
             <p className="text-sm text-muted">Sin gastos este mes.</p>
           )}
@@ -104,7 +104,7 @@ export default async function InformePage({ searchParams }: PageProps<'/informe'
           </table>
         </div>
 
-        <section className="bloque mt-6 flex items-baseline justify-between border-y-2 border-ink py-3">
+        <section className="bloque mt-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-y-2 border-ink py-3">
           <span className="font-semibold">Flujo de caja del mes</span>
           <span className={`num text-2xl font-semibold ${p.actual.flujo < 0 ? 'text-neg' : ''}`}>{euros(p.actual.flujo)} €</span>
         </section>
@@ -112,7 +112,8 @@ export default async function InformePage({ searchParams }: PageProps<'/informe'
         {p.eventosMes.length > 0 && (
           <div className="bloque">
             <h2>Por evento</h2>
-            <table>
+            <div className="desplazable">
+            <table className="min-w-[28rem]">
               <thead>
                 <tr>
                   <th>Evento</th>
@@ -134,13 +135,15 @@ export default async function InformePage({ searchParams }: PageProps<'/informe'
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
 
         <div className="bloque">
           <h2>Últimos 6 meses</h2>
-          <div className="grafico" dangerouslySetInnerHTML={{ __html: p.graficos.meses }} />
-          <table className="mt-2">
+          <Grafico svg={p.graficos.ancho.meses} movil={p.graficos.movil.meses} />
+          <div className="desplazable mt-2">
+          <table className="min-w-[20rem]">
             <thead>
               <tr>
                 <th>Mes</th>
@@ -160,12 +163,14 @@ export default async function InformePage({ searchParams }: PageProps<'/informe'
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
         {p.cierresMes.length > 0 && (
           <div className="salto">
             <h2>Detalle de cierres</h2>
-            <table>
+            <div className="desplazable">
+            <table className="min-w-[34rem]">
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -181,21 +186,31 @@ export default async function InformePage({ searchParams }: PageProps<'/informe'
               <tbody>
                 {[...p.cierresMes].reverse().map((c) => (
                   <tr key={c.id}>
-                    <td className="num text-left!">{fechaCorta(c.fecha)}</td>
+                    <td className="whitespace-nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>{fechaCorta(c.fecha)}</td>
                     <td>{c.turno}</td>
                     <td className="text-muted">{c.evento ?? ''}</td>
                     {metodos.map((m) => (
-                      <td key={m.id} className="num">{c.ingresos[m.id] ? euros(c.ingresos[m.id]) : '—'}</td>
+                      <td key={m.id} className="num">{c.ingresos[m.id] ? euros(c.ingresos[m.id]) : ''}</td>
                     ))}
-                    <td className="num">{c.totalGastos ? euros(c.totalGastos) : '—'}</td>
+                    <td className="num">{c.totalGastos ? euros(c.totalGastos) : ''}</td>
                     <td className="num">{euros(c.totalIngresos - c.totalGastos)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </article>
+    </>
+  )
+}
+
+function Grafico({ svg, movil }: { svg: string; movil: string }) {
+  return (
+    <>
+      <div className="grafico hidden sm:block print:block" dangerouslySetInnerHTML={{ __html: svg }} />
+      <div className="grafico sm:hidden print:hidden" dangerouslySetInnerHTML={{ __html: movil }} />
     </>
   )
 }
@@ -204,7 +219,7 @@ function Cifra({ etiqueta, valor, destacado, negativo }: { etiqueta: string; val
   return (
     <div className={`rounded-md px-3 py-2.5 ${destacado ? 'bg-accent-soft' : 'border border-line'}`}>
       <p className="text-[11px] text-muted">{etiqueta}</p>
-      <p className={`num text-left text-lg font-semibold ${negativo ? 'text-neg' : destacado ? 'text-accent' : ''}`}>{valor}</p>
+      <p className={`num text-left text-base sm:text-lg font-semibold ${negativo ? 'text-neg' : destacado ? 'text-accent' : ''}`}>{valor}</p>
     </div>
   )
 }

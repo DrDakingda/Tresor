@@ -319,7 +319,7 @@ export function CierreForm(props: Props) {
           ) : (
             <div className="divide-y divide-line">
               {gastos.map((g, i) => (
-                <div key={g.key} className="px-4 sm:px-5 py-3 grid gap-2 sm:grid-cols-12 items-end">
+                <div key={g.key} className="px-4 sm:px-5 py-3 grid gap-2 grid-cols-2 sm:grid-cols-12 items-end">
                   <label className="space-y-1 sm:col-span-2">
                     <span className="etiqueta">Método</span>
                     <select className="campo" value={g.metodo} onChange={(e) => actualizarGasto(g.key, { metodo: e.target.value as MetodoPago })}>
@@ -340,7 +340,7 @@ export function CierreForm(props: Props) {
                       <option value={NUEVA_CATEGORIA}>+ Nueva categoría</option>
                     </select>
                   </label>
-                  <label className="space-y-1 sm:col-span-3">
+                  <label className="space-y-1 col-span-2 sm:col-span-3">
                     <span className="etiqueta">Concepto</span>
                     <input className="campo" placeholder="Hielo, bombillas…" value={g.concepto} onChange={(e) => actualizarGasto(g.key, { concepto: e.target.value })} />
                   </label>
@@ -359,7 +359,7 @@ export function CierreForm(props: Props) {
                     <span className="etiqueta">Importe</span>
                     <input className="campo num" inputMode="decimal" placeholder="0,00" value={g.importe} onChange={(e) => actualizarGasto(g.key, { importe: e.target.value })} />
                   </label>
-                  <div className="sm:col-span-12 flex items-center justify-between gap-2">
+                  <div className="col-span-2 sm:col-span-12 flex items-center justify-between gap-2">
                     <TicketBoton
                       ruta={g.ticket_path}
                       subiendo={!!g.subiendo}
@@ -401,15 +401,15 @@ export function CierreForm(props: Props) {
       {error && <p className="text-sm text-neg bg-neg-soft rounded-md px-4 py-3">{error}</p>}
 
       {editable && (
-        <div className="flex flex-wrap gap-2 justify-between no-print">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-between no-print">
           {cierre ? (
             <button type="button" onClick={borrar} disabled={guardando} className="btn btn-peligro">Borrar cierre</button>
           ) : (
             <span />
           )}
-          <div className="flex gap-2">
-            <button type="button" onClick={() => router.back()} className="btn">Cancelar</button>
-            <button className="btn btn-primario" disabled={guardando}>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <button type="button" onClick={() => router.back()} className="btn flex-1 sm:flex-none">Cancelar</button>
+            <button className="btn btn-primario flex-1 sm:flex-none" disabled={guardando}>
               {guardando ? 'Guardando…' : 'Guardar cierre'}
             </button>
           </div>

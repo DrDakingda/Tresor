@@ -8,7 +8,6 @@ const TINTA = '#1b1b19'
 const SECUNDARIO = '#6b6a64'
 const REJILLA = '#e4e2dc'
 const SUPERFICIE = '#ffffff'
-const FUENTE = "font-family=\"Inter, system-ui, sans-serif\""
 
 const compacto = new Intl.NumberFormat('es-ES', { notation: 'compact', maximumFractionDigits: 1 })
 const euros = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: 'always' })
@@ -59,7 +58,7 @@ function ejeY(max: number, x0: number, x1: number, yBase: number, alto: number) 
 }
 
 function envolver(ancho: number, alto: number, titulo: string, cuerpo: string) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${ancho}" height="${alto}" viewBox="0 0 ${ancho} ${alto}" ${FUENTE} role="img"><title>${esc(titulo)}</title><rect width="${ancho}" height="${alto}" fill="${SUPERFICIE}"/>${cuerpo}</svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${ancho}" height="${alto}" viewBox="0 0 ${ancho} ${alto}" font-family="inherit" role="img"><title>${esc(titulo)}</title><rect width="${ancho}" height="${alto}" fill="${SUPERFICIE}"/>${cuerpo}</svg>`
 }
 
 /** Ingresos de cada día del mes, apilados por forma de cobro. */
@@ -147,15 +146,16 @@ export function graficoReparto(items: { nombre: string; color: string; valor: nu
 export function graficoBarrasH(items: { nombre: string; valor: number }[], ancho = 720) {
   const fila = 26
   const alto = Math.max(1, items.length) * fila + 8
-  const izq = 150
-  const der = 90
+  const estrecho = ancho < 500
+  const izq = estrecho ? 108 : 150
+  const der = estrecho ? 78 : 90
   const max = Math.max(...items.map((i) => i.valor), 0) || 1
   const cuerpo = items
     .map((it, i) => {
       const y = 4 + i * fila
       const w = (it.valor / max) * (ancho - izq - der)
       return (
-        `<text x="${izq - 10}" y="${y + 15}" font-size="11" fill="${TINTA}" text-anchor="end">${esc(it.nombre.length > 22 ? it.nombre.slice(0, 21) + '…' : it.nombre)}</text>` +
+        `<text x="${izq - 10}" y="${y + 15}" font-size="11" fill="${TINTA}" text-anchor="end">${esc(it.nombre.length > (estrecho ? 16 : 22) ? it.nombre.slice(0, estrecho ? 15 : 21) + '…' : it.nombre)}</text>` +
         `<path d="${barraH(izq, y + 4, w, 14)}" fill="${ACENTO}"><title>${esc(it.nombre)}: ${eur(it.valor)}</title></path>` +
         `<text x="${izq + w + 6}" y="${y + 15}" font-size="11" fill="${SECUNDARIO}">${eur(it.valor)}</text>`
       )

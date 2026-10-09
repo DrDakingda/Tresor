@@ -33,15 +33,18 @@ export default async function CierrePage({ params }: PageProps<'/cierres/[id]'>)
 
   return (
     <div className="space-y-5">
-      <div className="flex items-end justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <Link href={`/cierres?mes=${cierre.fecha.slice(0, 7)}`} className="text-sm text-muted hover:text-ink no-print">← Cierres</Link>
           <h1 className="text-xl font-semibold tracking-tight mt-1 first-letter:uppercase">Cierre del {fechaLarga(cierre.fecha)}</h1>
         </div>
-        <div className="flex gap-2 no-print">
+        <div className="grid grid-cols-2 sm:flex gap-2 no-print">
           <a href={`/imprimir/cierre/${cierre.id}`} target="_blank" rel="noopener" className="btn">Imprimir</a>
           {perfil.rol === 'admin' && (
-            <Link href={`/historial?cierre=${cierre.id}`} className="btn">Historial de cambios</Link>
+            <Link href={`/historial?cierre=${cierre.id}`} className="btn">
+              <span className="sm:hidden">Historial</span>
+              <span className="hidden sm:inline">Historial de cambios</span>
+            </Link>
           )}
         </div>
       </div>

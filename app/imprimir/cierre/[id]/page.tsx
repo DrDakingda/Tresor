@@ -57,7 +57,7 @@ export default async function ImprimirCierrePage({ params }: PageProps<'/imprimi
     <>
       <BarraImpresion volver={`/cierres/${c.id}`} />
       <article className="hoja">
-        <header className="flex items-start justify-between border-b-2 border-ink pb-3">
+        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 border-b-2 border-ink pb-3">
           <div>
             <p className="text-xs text-muted uppercase tracking-wider">Cierre de caja</p>
             <h1 className="text-2xl font-semibold tracking-tight first-letter:uppercase">{fechaLarga(c.fecha)} {c.fecha.slice(0, 4)}</h1>
@@ -66,7 +66,7 @@ export default async function ImprimirCierrePage({ params }: PageProps<'/imprimi
               {c.eventos && ` · ${c.eventos.nombre}`}
             </p>
           </div>
-          <div className="text-right text-xs text-muted">
+          <div className="sm:text-right text-xs text-muted">
             <p className="font-semibold text-ink text-sm">Tresor</p>
             <p>Cerrado por {c.perfiles?.nombre ?? '—'}</p>
             <p>Última modificación {fechaHora(c.updated_at)}</p>
@@ -101,7 +101,30 @@ export default async function ImprimirCierrePage({ params }: PageProps<'/imprimi
         {gastos.length === 0 ? (
           <p className="text-sm text-muted">Sin gastos.</p>
         ) : (
-          <table>
+          <>
+          {/* Móvil: lista de gastos */}
+          <ul className="sm:hidden print:hidden divide-y divide-line border-y border-line text-sm">
+            {gastos.map((g, n) => (
+              <li key={n} className="py-2">
+                <div className="flex justify-between gap-3">
+                  <span className="min-w-0">
+                    {g.categorias_gasto?.nombre}
+                    {g.concepto && <span className="text-muted"> · {g.concepto}</span>}
+                  </span>
+                  <span className="num shrink-0">{euros(g.importe)}</span>
+                </div>
+                <p className="text-xs text-muted">
+                  {METODOS_PAGO.find((m) => m.value === g.metodo)?.label} · autoriza {g.autorizadores?.nombre} · ticket {g.ticket_path ? 'sí' : 'no'}
+                </p>
+              </li>
+            ))}
+            <li className="py-2 flex justify-between font-semibold">
+              <span>Total gastos</span>
+              <span className="num">{euros(totalGastos)}</span>
+            </li>
+          </ul>
+          {/* Escritorio e impresión: tabla */}
+          <table className="hidden sm:table print:table">
             <thead>
               <tr>
                 <th>Método</th>
@@ -131,9 +154,10 @@ export default async function ImprimirCierrePage({ params }: PageProps<'/imprimi
               </tr>
             </tfoot>
           </table>
+          </>
         )}
 
-        <section className="grid grid-cols-3 gap-3 mt-6 bloque">
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 bloque">
           <Cifra etiqueta="Efectivo neto" valor={efectivo - gastosEfectivo} ayuda="Efectivo − gastos en efectivo" />
           <Cifra etiqueta="Total gastos" valor={totalGastos} />
           <Cifra etiqueta="Resultado del cierre" valor={totalIngresos - totalGastos} destacado />

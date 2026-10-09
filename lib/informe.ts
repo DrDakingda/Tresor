@@ -36,12 +36,14 @@ export async function cargarInforme(supabase: SupabaseClient, mes: string, local
     return { etiqueta: `${MESES_CORTOS[mm - 1]} ${String(a).slice(2)}`, ingresos: h.ingresos, gastos: h.gastosCaja + h.movimientos }
   })
 
-  const graficos = {
-    diario: graficoIngresosDiarios(dias, seriesDiarias),
-    reparto: graficoReparto(metodos.map((m) => ({ nombre: m.nombre, color: m.color, valor: m.importe }))),
-    partidas: partidas.length ? graficoBarrasH(partidas) : null,
-    meses: graficoMeses(meses),
-  }
+  // Cada gráfico en dos anchos: A4/escritorio y móvil (en móvil el de A4 se encogería hasta no leerse).
+  const dibujar = (ancho: number) => ({
+    diario: graficoIngresosDiarios(dias, seriesDiarias, ancho, ancho < 500 ? 200 : 230),
+    reparto: graficoReparto(metodos.map((m) => ({ nombre: m.nombre, color: m.color, valor: m.importe })), ancho),
+    partidas: partidas.length ? graficoBarrasH(partidas, ancho) : null,
+    meses: graficoMeses(meses, ancho, ancho < 500 ? 200 : 220),
+  })
+  const graficos = { ancho: dibujar(720), movil: dibujar(360) }
 
   return { ...p, dias, partidas, graficos }
 }

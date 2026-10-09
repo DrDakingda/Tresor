@@ -20,7 +20,7 @@ export type Snapshot = {
 
 export type Cambio = { texto: string; antes?: string; despues?: string }
 
-const eur = (n: number | undefined) => `${euros(Number(n ?? 0))} €`
+const eur = (n: number | undefined) => `${euros(Number(n ?? 0))} €`
 
 function describirGasto(g: Snapshot['gastos'][number]) {
   return `${g.categoria}${g.concepto ? ` · ${g.concepto}` : ''} · ${eur(g.importe)} (${g.metodo}, autoriza ${g.autorizado})`

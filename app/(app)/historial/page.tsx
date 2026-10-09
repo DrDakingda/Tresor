@@ -98,33 +98,35 @@ export default async function HistorialPage({ searchParams }: PageProps<'/histor
                     {e.accion === 'creado' ? 'Creado' : e.accion === 'modificado' ? 'Modificado' : 'Borrado'}
                   </span>
                   <span className="font-medium">{e.usuario_nombre ?? 'Desconocido'}</span>
-                  <span className="text-muted num">{fechaHora(e.created_at)}</span>
-                  {!cierreId && (
-                    <span className="text-muted">
-                      · cierre del{' '}
+                  <span className="text-muted ml-auto" style={{ fontVariantNumeric: 'tabular-nums' }}>{fechaHora(e.created_at)}</span>
+                </div>
+                {!cierreId && (
+                  <p className="text-sm text-muted mt-1">
+                      Cierre del{' '}
                       {e.accion === 'borrado' ? (
                         fechaLarga(e.datos.fecha)
                       ) : (
                         <Link href={`/historial?cierre=${e.cierre_id}`} className="underline hover:text-ink">{fechaLarga(e.datos.fecha)}</Link>
                       )}
                       {' '}· {variosLocales && `${nombreLocal(e.local_id)} · `}{variasCajas && `${e.datos.caja} · `}{e.datos.turno}
-                    </span>
-                  )}
-                </div>
+                  </p>
+                )}
 
                 {e.accion === 'modificado' && (
                   cambios.length ? (
-                    <table className="w-full text-sm mt-3">
-                      <tbody>
-                        {cambios.map((c, i) => (
-                          <tr key={i} className="border-t border-line align-top">
-                            <td className="py-1.5 pr-3 text-muted w-1/3">{c.texto}</td>
-                            <td className="py-1.5 pr-3 text-neg line-through decoration-1">{c.antes}</td>
-                            <td className="py-1.5 text-pos">{c.despues}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <ul className="text-sm mt-3">
+                      {cambios.map((c, i) => (
+                        // Móvil: qué cambió arriba y "antes → después" debajo. Escritorio: en tres columnas.
+                        <li key={i} className="border-t border-line py-1.5 sm:grid sm:grid-cols-3 sm:gap-3">
+                          <p className="text-muted text-xs sm:text-sm">{c.texto}</p>
+                          <p className="sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-3">
+                            {c.antes && <span className="text-neg line-through decoration-1">{c.antes}</span>}
+                            {c.antes && c.despues && <span className="sm:hidden text-faint"> → </span>}
+                            {c.despues ? <span className="text-pos">{c.despues}</span> : <span className="hidden sm:block" />}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
                   ) : (
                     <p className="text-sm text-muted mt-2">Sin versión anterior con la que comparar.</p>
                   )

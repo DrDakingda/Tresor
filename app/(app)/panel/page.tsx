@@ -23,17 +23,18 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
           <h1 className="text-xl font-semibold tracking-tight">Resumen</h1>
-          <p className="text-sm text-muted capitalize print:block">
-            {nombreMes(mes)}
-            {locales && locales.length > 1 && ` · ${locales.find((l) => l.id === localId)?.nombre}`}
-          </p>
+          <div className="flex gap-2 no-print">
+            <a href={`/api/export?mes=${mes}${sufijo}`} className="btn h-9 px-3">Excel</a>
+            <a href={`/informe?mes=${mes}${sufijo}`} target="_blank" rel="noopener" className="btn h-9 px-3">PDF</a>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 no-print">
+          <MesSelector mes={mes} ruta="/panel" extra={sufijo} />
           {locales && locales.length > 1 && (
-            <div className="flex gap-1">
+            <div className="flex gap-1 overflow-x-auto">
               {locales.map((l) => (
                 <Link key={l.id} href={`/panel?mes=${mes}&local=${l.id}`} className={`btn h-9 ${l.id === localId ? 'bg-accent-soft text-accent border-accent' : ''}`}>
                   {l.nombre}
@@ -41,9 +42,6 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
               ))}
             </div>
           )}
-          <MesSelector mes={mes} ruta="/panel" />
-          <a href={`/api/export?mes=${mes}${sufijo}`} className="btn">Excel</a>
-          <a href={`/informe?mes=${mes}${sufijo}`} target="_blank" rel="noopener" className="btn">PDF</a>
         </div>
       </div>
 
@@ -54,7 +52,7 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
         <Cifra etiqueta="Flujo de caja" valor={p.actual.flujo} destacado />
         <div className="tarjeta px-4 py-3">
           <p className="text-xs text-muted">Vs. {nombreMes(p.anterior.mes).split(' ')[0]}</p>
-          <p className={`num text-left text-xl font-medium ${variacion === null ? 'text-faint' : variacion >= 0 ? 'text-pos' : 'text-neg'}`}>
+          <p className={`num text-left text-lg sm:text-xl font-medium ${variacion === null ? 'text-faint' : variacion >= 0 ? 'text-pos' : 'text-neg'}`}>
             {variacion === null ? '—' : `${variacion >= 0 ? '+' : ''}${variacion.toFixed(1).replace('.', ',')} %`}
           </p>
           <p className="text-xs text-faint">Flujo anterior: {euros(p.anterior.flujo)}</p>
@@ -70,7 +68,7 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
               {p.ingresosPorMetodo.map((m) => (
                 <tr key={m.id} className="border-b border-line">
                   <td className="py-2">{m.nombre}</td>
-                  <td className="num py-2 text-muted text-xs w-16">{p.actual.ingresos ? `${Math.round((m.importe / p.actual.ingresos) * 100)} %` : ''}</td>
+                  <td className="num py-2 pl-3 text-muted text-xs w-16">{p.actual.ingresos ? `${Math.round((m.importe / p.actual.ingresos) * 100)} %` : ''}</td>
                   <td className="num py-2">{euros(m.importe)}</td>
                 </tr>
               ))}
@@ -109,14 +107,14 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
       </section>
 
       {/* Flujo */}
-      <section className="tarjeta p-4 sm:p-5 flex items-baseline justify-between border-line-strong">
+      <section className="tarjeta p-4 sm:p-5 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 border-line-strong">
         <span className="font-medium">Flujo de caja de {nombreMes(mes)}</span>
-        <span className={`num text-2xl font-medium ${p.actual.flujo < 0 ? 'text-neg' : 'text-pos'}`}>{euros(p.actual.flujo)}</span>
+        <span className={`num text-left sm:text-right text-2xl font-medium ${p.actual.flujo < 0 ? 'text-neg' : 'text-pos'}`}>{euros(p.actual.flujo)}</span>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
         {/* Gastos de caja por categoría */}
-        <div className="tarjeta p-4 sm:p-5 overflow-x-auto">
+        <div className="tarjeta p-4 sm:p-5">
           <h2 className="etiqueta mb-2">Gastos de caja por categoría</h2>
           {p.gastosPorCategoria.length === 0 ? (
             <p className="text-sm text-muted">Sin gastos de caja este mes.</p>
@@ -125,20 +123,32 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
               <thead>
                 <tr className="border-b border-line text-xs text-muted">
                   <th className="text-left font-normal py-1.5">Categoría</th>
-                  <th className="text-right font-normal py-1.5">Efectivo</th>
-                  <th className="text-right font-normal py-1.5">Tarjeta</th>
-                  <th className="text-right font-normal py-1.5">Transf.</th>
-                  <th className="text-right font-normal py-1.5">Total</th>
+                  <th className="hidden sm:table-cell text-right font-normal py-1.5 pl-3">Efectivo</th>
+                  <th className="hidden sm:table-cell text-right font-normal py-1.5 pl-3">Tarjeta</th>
+                  <th className="hidden sm:table-cell text-right font-normal py-1.5 pl-3">Transf.</th>
+                  <th className="text-right font-normal py-1.5 pl-3">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {p.gastosPorCategoria.map((c) => (
                   <tr key={c.nombre} className="border-b border-line last:border-0">
-                    <td className="py-2">{c.nombre}</td>
-                    <td className="num py-2 text-muted">{c.efectivo ? euros(c.efectivo) : '—'}</td>
-                    <td className="num py-2 text-muted">{c.tarjeta ? euros(c.tarjeta) : '—'}</td>
-                    <td className="num py-2 text-muted">{c.transferencia ? euros(c.transferencia) : '—'}</td>
-                    <td className="num py-2 font-medium">{euros(c.total)}</td>
+                    <td className="py-2">
+                      {c.nombre}
+                      {/* En móvil el desglose por método va debajo del nombre */}
+                      <span className="sm:hidden block text-xs text-muted">
+                        {[
+                          c.efectivo && `Efectivo ${euros(c.efectivo)}`,
+                          c.tarjeta && `Tarjeta ${euros(c.tarjeta)}`,
+                          c.transferencia && `Transf. ${euros(c.transferencia)}`,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    </td>
+                    <td className="hidden sm:table-cell num py-2 pl-3 text-muted">{c.efectivo ? euros(c.efectivo) : ''}</td>
+                    <td className="hidden sm:table-cell num py-2 pl-3 text-muted">{c.tarjeta ? euros(c.tarjeta) : ''}</td>
+                    <td className="hidden sm:table-cell num py-2 pl-3 text-muted">{c.transferencia ? euros(c.transferencia) : ''}</td>
+                    <td className="num py-2 pl-3 font-medium align-top">{euros(c.total)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -161,20 +171,20 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
             <thead>
               <tr className="border-b border-line text-xs text-muted">
                 <th className="text-left font-normal py-1.5">Evento</th>
-                <th className="text-right font-normal py-1.5">Cierres</th>
-                <th className="text-right font-normal py-1.5">Ingresos</th>
-                <th className="text-right font-normal py-1.5">Gastos</th>
-                <th className="text-right font-normal py-1.5">Neto</th>
+                <th className="hidden sm:table-cell text-right font-normal py-1.5 pl-3">Cierres</th>
+                <th className="text-right font-normal py-1.5 pl-3">Ingresos</th>
+                <th className="hidden sm:table-cell text-right font-normal py-1.5 pl-3">Gastos</th>
+                <th className="text-right font-normal py-1.5 pl-3">Neto</th>
               </tr>
             </thead>
             <tbody>
               {p.eventosMes.map((e) => (
                 <tr key={e.nombre} className="border-b border-line last:border-0">
                   <td className="py-2">{e.nombre}</td>
-                  <td className="num py-2 text-muted">{e.cierres}</td>
-                  <td className="num py-2">{euros(e.ingresos)}</td>
-                  <td className="num py-2 text-muted">{euros(e.gastos)}</td>
-                  <td className="num py-2 font-medium">{euros(e.neto)}</td>
+                  <td className="hidden sm:table-cell num py-2 pl-3 text-muted">{e.cierres}</td>
+                  <td className="num py-2 pl-3">{euros(e.ingresos)}</td>
+                  <td className="hidden sm:table-cell num py-2 pl-3 text-muted">{euros(e.gastos)}</td>
+                  <td className="num py-2 pl-3 font-medium">{euros(e.neto)}</td>
                 </tr>
               ))}
             </tbody>
@@ -189,10 +199,10 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
           <thead>
             <tr className="border-b border-line text-xs text-muted">
               <th className="text-left font-normal py-1.5">Mes</th>
-              <th className="text-right font-normal py-1.5">Ingresos</th>
-              <th className="text-right font-normal py-1.5">Gastos caja</th>
-              <th className="text-right font-normal py-1.5">Fijos, personal…</th>
-              <th className="text-right font-normal py-1.5">Flujo</th>
+              <th className="text-right font-normal py-1.5 pl-3">Ingresos</th>
+              <th className="hidden sm:table-cell text-right font-normal py-1.5 pl-3">Gastos caja</th>
+              <th className="hidden sm:table-cell text-right font-normal py-1.5 pl-3">Fijos, personal…</th>
+              <th className="text-right font-normal py-1.5 pl-3">Flujo</th>
             </tr>
           </thead>
           <tbody>
@@ -201,10 +211,10 @@ export default async function PanelPage({ searchParams }: PageProps<'/panel'>) {
                 <td className="py-2 capitalize">
                   <Link href={`/panel?mes=${h.mes}${sufijo}`} className="hover:underline">{nombreMes(h.mes)}</Link>
                 </td>
-                <td className="num py-2">{euros(h.ingresos)}</td>
-                <td className="num py-2 text-muted">{euros(h.gastosCaja)}</td>
-                <td className="num py-2 text-muted">{euros(h.movimientos)}</td>
-                <td className={`num py-2 ${h.flujo < 0 ? 'text-neg' : ''}`}>{euros(h.flujo)}</td>
+                <td className="num py-2 pl-3">{euros(h.ingresos)}</td>
+                <td className="hidden sm:table-cell num py-2 pl-3 text-muted">{euros(h.gastosCaja)}</td>
+                <td className="hidden sm:table-cell num py-2 pl-3 text-muted">{euros(h.movimientos)}</td>
+                <td className={`num py-2 pl-3 ${h.flujo < 0 ? 'text-neg' : ''}`}>{euros(h.flujo)}</td>
               </tr>
             ))}
           </tbody>
@@ -218,7 +228,7 @@ function Cifra({ etiqueta, valor, destacado }: { etiqueta: string; valor: number
   return (
     <div className={`rounded-[10px] px-4 py-3 ${destacado ? 'bg-accent-soft' : 'tarjeta'}`}>
       <p className="text-xs text-muted">{etiqueta}</p>
-      <p className={`num text-left text-xl font-medium ${valor < 0 ? 'text-neg' : destacado ? 'text-accent' : ''}`}>{euros(valor)}</p>
+      <p className={`num text-left text-lg sm:text-xl font-medium ${valor < 0 ? 'text-neg' : destacado ? 'text-accent' : ''}`}>{euros(valor)}</p>
     </div>
   )
 }

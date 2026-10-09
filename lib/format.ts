@@ -14,7 +14,7 @@ export function parseImporte(s: string): number {
 }
 
 export function importeAInput(n: number) {
-  return n ? String(n).replace('.', ',') : ''
+  return n ? euros(n) : ''
 }
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']

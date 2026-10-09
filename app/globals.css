@@ -32,97 +32,105 @@
   --color-neg-soft: var(--neg-soft);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-plex-mono);
+  --font-sans: var(--font-sans-flex), system-ui, sans-serif;
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-sans-flex), system-ui, sans-serif;
 }
 
-.num {
-  font-family: var(--font-plex-mono), ui-monospace, monospace;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  white-space: nowrap;
+/* En una capa para que las utilidades de Tailwind (text-left, h-9…) puedan sobrescribirlas. */
+@layer components {
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .campo {
+    width: 100%;
+    min-width: 0;
+    height: 2.5rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    padding: 0 0.75rem;
+    font-size: 1rem; /* 16px: evita que iOS haga zoom al tocar un campo */
+  }
+  .campo:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    height: 2.5rem;
+    padding: 0 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .btn:hover { background: #f1f0ec; }
+  .btn:disabled { opacity: 0.6; cursor: default; }
+  .btn-primario { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primario:hover { background: #184b3c; }
+  .btn-peligro { color: var(--neg); }
+
+  .tarjeta {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+
+  .etiqueta {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Páginas imprimibles (informe mensual y cierre) */
+  .hoja {
+    background: #fff;
+    max-width: 210mm;
+    margin: 1.5rem auto;
+    padding: 14mm;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+  }
+  .hoja h2 { font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 1.75rem 0 0.5rem; }
+  .hoja table { width: 100%; font-size: 0.8125rem; border-collapse: collapse; }
+  .hoja th { font-weight: 500; color: var(--muted); font-size: 0.75rem; text-align: left; padding: 0.35rem 0.5rem 0.35rem 0; border-bottom: 1px solid var(--line-strong); }
+  .hoja td { padding: 0.35rem 0.5rem 0.35rem 0; border-bottom: 1px solid var(--line); }
+  .hoja th.num, .hoja td.num { text-align: right; padding-right: 0; padding-left: 0.5rem; }
+  .hoja tfoot td { font-weight: 600; border-bottom: none; border-top: 1px solid var(--line-strong); }
+  .grafico svg { width: 100%; height: auto; display: block; }
+  /* Tablas anchas: en pantallas estrechas se desplazan en horizontal en vez de romper la página. */
+  .desplazable { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .salto { break-before: page; }
+  .bloque { break-inside: avoid; }
 }
 
-.campo {
-  width: 100%;
-  height: 2.5rem;
-  border: 1px solid var(--line-strong);
-  border-radius: 6px;
-  background: var(--surface);
-  padding: 0 0.75rem;
-  font-size: 0.9375rem;
-}
-.campo:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: -1px;
+@media (max-width: 640px) {
+  .hoja { margin: 0; padding: 1.25rem 1rem 2rem; box-shadow: none; }
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  height: 2.5rem;
-  padding: 0 1rem;
-  border-radius: 6px;
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-.btn:hover { background: #f1f0ec; }
-.btn:disabled { opacity: 0.6; cursor: default; }
-.btn-primario { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn-primario:hover { background: #184b3c; }
-.btn-peligro { color: var(--neg); }
-
-.tarjeta {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-
-.etiqueta {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
+@page { size: A4; margin: 12mm; }
 @media print {
   body { background: #fff; }
   .no-print { display: none !important; }
   .tarjeta { border-color: #ccc; break-inside: avoid; }
-}
-
-/* Páginas imprimibles (informe mensual y cierre) */
-.hoja {
-  background: #fff;
-  max-width: 210mm;
-  margin: 1.5rem auto;
-  padding: 14mm;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
-}
-.hoja h2 { font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 1.75rem 0 0.5rem; }
-.hoja table { width: 100%; font-size: 0.8125rem; border-collapse: collapse; }
-.hoja th { font-weight: 500; color: var(--muted); font-size: 0.75rem; text-align: left; padding: 0.35rem 0.5rem 0.35rem 0; border-bottom: 1px solid var(--line-strong); }
-.hoja td { padding: 0.35rem 0.5rem 0.35rem 0; border-bottom: 1px solid var(--line); }
-.hoja th.num, .hoja td.num { text-align: right; padding-right: 0; padding-left: 0.5rem; }
-.hoja tfoot td { font-weight: 600; border-bottom: none; border-top: 1px solid var(--line-strong); }
-.grafico svg { width: 100%; height: auto; display: block; }
-.salto { break-before: page; }
-.bloque { break-inside: avoid; }
-
-@page { size: A4; margin: 12mm; }
-@media print {
   .hoja { margin: 0; padding: 0; box-shadow: none; max-width: none; }
+  .desplazable { overflow: visible; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
